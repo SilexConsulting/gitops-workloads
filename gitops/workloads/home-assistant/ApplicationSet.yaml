@@ -1,0 +1,54 @@
+# nonk8s
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: home-assistant
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - merge:
+        mergeKeys: [server]
+        generators:
+          - clusters:
+              selector:
+                matchLabels:
+                  type: "workload"
+              values:
+                chartVersion: "0.3.10" # Default chart version
+          - clusters:
+              selector:
+                matchLabels:
+                  env: dev
+              values:
+                chartVersion: " 0.3.19" # Default addon chart version for dev
+  template:
+    metadata:
+      name: home-assistant-{{.name}}
+    spec:
+      project: default
+      sources:
+        - repoURL: '{{.metadata.annotations.workloads_repo_url}}'
+          path: 'gitops/workloads'
+          targetRevision: main
+          ref: workloads
+        - repoURL: https://pajikos.github.io/home-assistant-helm-chart/
+          chart: home-assistant
+          targetRevision: '{{.values.chartVersion}}'
+          helm:
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - '$workloads/environments/default/workloads/home-assistant/values.yaml'
+              - '$workloads/environments/{{.metadata.labels.env}}/workloads/home-assistant/values.yaml'
+              - '$workloads/cluster/{{.metadata.labels.cluster_name}}/workloads/home-assistant/values.yaml'
+      destination:
+        server: '{{.server}}'
+        namespace: 'home-assistant-{{.metadata.labels.env}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
