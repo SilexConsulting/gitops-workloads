@@ -8,23 +8,32 @@ spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
-    - merge:
-        mergeKeys: [server]
+    - matrix:
         generators:
+          # Workload clusters (+ env-specific overrides)
+          - merge:
+              mergeKeys: [server]
+              generators:
+                - clusters:
+                    selector:
+                      matchLabels:
+                        type: workload
+                    values:
+                      targetRepository: '{{metadata.annotations.workloads_repo_url}}'
+                      chartVersion: "3.2.1"
+                - clusters:
+                    selector:
+                      matchLabels:
+                        env: prod
+                    values:
+                      chartVersion: "3.2.0"
+          # Hub cluster (single item) provides the revision for everyone
           - clusters:
-              values:
-                targetRevision: '{{metadata.annotations.workloads_repo_revision}}'
-                targetRepository: '{{metadata.annotations.workloads_repo_url}}'
-                chartVersion: "3.2.1" # Default chart version
               selector:
                 matchLabels:
-                  type: "workload"
-          - clusters:
-              selector:
-                matchLabels:
-                  env: prod
+                  role: hub         # <-- label your hub cluster secret with this
               values:
-                chartVersion: " 3.2.0" # Chart version for dev
+                hubTargetRevision: '{{metadata.annotations.workloads_repo_revision}}'
   template:
     metadata:
       name: opensearch-{{.name}}
@@ -32,8 +41,8 @@ spec:
       project: default
       sources:
         - repoURL: '{{.values.targetRepository}}'
-          path: 'gitops/workloads'
-          targetRevision: '{{.values.targetRevision}}'
+          path: gitops/workloads
+          targetRevision: '{{.values.hubTargetRevision}}'
           ref: workloads
         - repoURL: https://opensearch-project.github.io/helm-charts
           chart: opensearch
