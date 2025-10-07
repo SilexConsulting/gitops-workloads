@@ -32,21 +32,21 @@ spec:
                 matchLabels:
                   type: hub
               values:
-                hubTargetRepository: '{{.metadata.annotations.workloads_repo_url}}'
-                hubTargetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
+                hubRepoUrl: '{{ .metadata.annotations.workloads_repo_url }}'
+                hubRepoRevision: '{{ .metadata.annotations.workloads_repo_revision }}'
   template:
     metadata:
       name: opensearch-{{.name}}
     spec:
       project: default
       sources:
-        - repoURL: '{{.values.hubTargetRepository}}'
+        - repoURL: '{{ .values.hubRepoUrl }}'
           path: gitops/workloads
-          targetRevision: '{{.values.hubTargetRevision}}'
+          targetRevision: '{{ .values.hubRepoRevision }}'
           ref: workloads
         - repoURL: https://opensearch-project.github.io/helm-charts
           chart: opensearch
-          targetRevision: '{{.values.chartVersion}}'
+          targetRevision: '{{ .values.chartVersion }}'
           helm:
             ignoreMissingValueFiles: true
             valueFiles:
