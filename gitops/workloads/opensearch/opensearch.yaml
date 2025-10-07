@@ -30,7 +30,7 @@ spec:
           - clusters:
               selector:
                 matchLabels:
-                  type: hub
+                  type: hubs
               values:
                 hubRepoUrl: '{{ .metadata.annotations.workloads_repo_url }}'
                 hubRepoRevision: '{{ .metadata.annotations.workloads_repo_revision }}'
