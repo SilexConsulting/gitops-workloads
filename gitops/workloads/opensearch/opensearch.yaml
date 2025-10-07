@@ -32,8 +32,10 @@ spec:
                 matchLabels:
                   type: hub
               values:
-                hubRepoUrl: '{{ `{{ .metadata.annotations.workloads_repo_url }}` }}'
-                hubRepoRevision: '{{ `{{ .metadata.annotations.workloads_repo_revision }}` }}'
+                hubRepoUrl: >-
+                  '{{ `{{ .metadata.annotations.workloads_repo_url }}` }}'
+                hubRepoRevision: >-
+                  '{{ `{{ .metadata.annotations.workloads_repo_revision }}` }}'
   template:
     metadata:
       name: opensearch-{{.name}}
