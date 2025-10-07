@@ -14,6 +14,7 @@ spec:
           - clusters:
               values:
                 targetRevision: '{{metadata.annotations.addons_repo_revision}}'
+                targetRepository: '{{metadata.annotations.addons_repo_url}}'
                 chartVersion: "3.2.1" # Default chart version
               selector:
                 matchLabels:
@@ -30,7 +31,7 @@ spec:
     spec:
       project: default
       sources:
-        - repoURL: '{{.metadata.annotations.workloads_repo_url}}'
+        - repoURL: '{{values.targetRepository}}'
           path: 'gitops/workloads'
           targetRevision: '{{values.targetRevision}}'
           ref: workloads
