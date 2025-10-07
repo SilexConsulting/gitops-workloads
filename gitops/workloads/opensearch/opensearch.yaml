@@ -30,7 +30,7 @@ spec:
           - clusters:
               selector:
                 matchLabels:
-                  type: hub         # <-- label your hub cluster secret with this
+                  type: hub
               values:
                 targetRepository: '{{.metadata.annotations.workloads_repo_url}}'
                 targetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
