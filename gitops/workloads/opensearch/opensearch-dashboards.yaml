@@ -42,9 +42,9 @@ spec:
     spec:
       project: default
       sources:
-        - repoURL: '{{.metadata.annotations.workloads_repo_url}}'
-          path: 'gitops/workloads'
-          targetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
+        - repoURL: '{{ .values.hubRepoUrl }}'
+          path: gitops/workloads
+          targetRevision: '{{ .values.hubRepoRevision }}'
           ref: workloads
         - repoURL: https://opensearch-project.github.io/helm-charts
           chart: opensearch-dashboards
