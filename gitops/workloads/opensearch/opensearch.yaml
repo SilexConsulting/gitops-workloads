@@ -19,8 +19,8 @@ spec:
                       matchLabels:
                         type: workload
                     values:
-                      targetRepository: '{{metadata.annotations.workloads_repo_url}}'
-                      hubTargetRevision: '{{metadata.annotations.workloads_repo_revision}}'
+                      targetRepository: '{{.metadata.annotations.workloads_repo_url}}'
+                      hubTargetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
                       chartVersion: "3.2.1"
                 - clusters:
                     selector:
@@ -34,8 +34,8 @@ spec:
                 matchLabels:
                   role: hub         # <-- label your hub cluster secret with this
               values:
-                targetRepository: '{{metadata.annotations.workloads_repo_url}}'
-                hubTargetRevision: '{{metadata.annotations.workloads_repo_revision}}'
+                targetRepository: '{{.metadata.annotations.workloads_repo_url}}'
+                hubTargetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
   template:
     metadata:
       name: opensearch-{{.name}}
