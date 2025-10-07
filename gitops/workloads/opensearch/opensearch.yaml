@@ -12,17 +12,18 @@ spec:
         mergeKeys: [server]
         generators:
           - clusters:
+              values:
+                targetRevision: '{{metadata.annotations.addons_repo_revision}}'
+                chartVersion: "3.2.1" # Default chart version
               selector:
                 matchLabels:
                   type: "workload"
-              values:
-                chartVersion: "3.2.1" # Default chart version
           - clusters:
               selector:
                 matchLabels:
                   env: prod
               values:
-                chartVersion: " 3.2.0" # Default addon chart version for dev
+                chartVersion: " 3.2.0" # Chart version for dev
   template:
     metadata:
       name: opensearch-{{.name}}
@@ -31,7 +32,7 @@ spec:
       sources:
         - repoURL: '{{.metadata.annotations.workloads_repo_url}}'
           path: 'gitops/workloads'
-          targetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
+          targetRevision: '{{values.targetRevision}}'
           ref: workloads
         - repoURL: https://opensearch-project.github.io/helm-charts
           chart: opensearch
