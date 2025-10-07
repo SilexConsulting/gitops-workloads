@@ -31,9 +31,9 @@ spec:
     spec:
       project: default
       sources:
-        - repoURL: '{{values.targetRepository}}'
+        - repoURL: '{{.values.targetRepository}}'
           path: 'gitops/workloads'
-          targetRevision: '{{values.targetRevision}}'
+          targetRevision: '{{.values.targetRevision}}'
           ref: workloads
         - repoURL: https://opensearch-project.github.io/helm-charts
           chart: opensearch
