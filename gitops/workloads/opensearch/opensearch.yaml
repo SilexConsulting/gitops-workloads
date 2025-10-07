@@ -32,7 +32,7 @@ spec:
           - clusters:
               selector:
                 matchLabels:
-                  role: hub         # <-- label your hub cluster secret with this
+                  type: hub         # <-- label your hub cluster secret with this
               values:
                 targetRepository: '{{.metadata.annotations.workloads_repo_url}}'
                 hubTargetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
