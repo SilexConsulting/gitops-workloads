@@ -8,21 +8,34 @@ spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
-    - merge:
-        mergeKeys: [server]
+    - matrix:
         generators:
+          # Workload clusters (+ env-specific overrides)
+          - merge:
+              mergeKeys: [server]
+              generators:
+                - clusters:
+                    selector:
+                      matchLabels:
+                        type: workload
+                    values:
+                      chartVersion: "3.2.1"
+                - clusters:
+                    selector:
+                      matchLabels:
+                        env: prod
+                    values:
+                      chartVersion: "3.2.0"
+          # Hub cluster (single item) provides the revision for everyone
           - clusters:
               selector:
                 matchLabels:
-                  type: "workload"
+                  type: hub
               values:
-                chartVersion: "3.2.1" # Default chart version
-          - clusters:
-              selector:
-                matchLabels:
-                  env: prod
-              values:
-                chartVersion: " 3.2.0" # Default addon chart version for dev
+                hubRepoUrl: >-
+                  {{ `{{ .metadata.annotations.workloads_repo_url }}` }}
+                hubRepoRevision: >-
+                  {{ `{{ .metadata.annotations.workloads_repo_revision }}` }}
   template:
     metadata:
       name: opensearch-dashboards-{{.name}}
