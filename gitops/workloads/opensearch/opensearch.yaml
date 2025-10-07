@@ -33,9 +33,9 @@ spec:
                   type: hub
               values:
                 hubRepoUrl: >-
-                  '{{ `{{ .metadata.annotations.workloads_repo_url }}` }}'
+                  {{ `{{ .metadata.annotations.workloads_repo_url }}` }}
                 hubRepoRevision: >-
-                  '{{ `{{ .metadata.annotations.workloads_repo_revision }}` }}'
+                  {{ `{{ .metadata.annotations.workloads_repo_revision }}` }}
   template:
     metadata:
       name: opensearch-{{.name}}
