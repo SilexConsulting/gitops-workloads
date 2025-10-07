@@ -19,8 +19,6 @@ spec:
                       matchLabels:
                         type: workload
                     values:
-                      targetRepository: '{{.metadata.annotations.workloads_repo_url}}'
-                      hubTargetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
                       chartVersion: "3.2.1"
                 - clusters:
                     selector:
@@ -35,7 +33,7 @@ spec:
                   type: hub         # <-- label your hub cluster secret with this
               values:
                 targetRepository: '{{.metadata.annotations.workloads_repo_url}}'
-                hubTargetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
+                targetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
   template:
     metadata:
       name: opensearch-{{.name}}
@@ -44,7 +42,7 @@ spec:
       sources:
         - repoURL: '{{.values.targetRepository}}'
           path: gitops/workloads
-          targetRevision: '{{.values.hubTargetRevision}}'
+          targetRevision: '{{.values.targetRevision}}'
           ref: workloads
         - repoURL: https://opensearch-project.github.io/helm-charts
           chart: opensearch
