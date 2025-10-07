@@ -13,8 +13,8 @@ spec:
         generators:
           - clusters:
               values:
-                targetRevision: '{{.metadata.annotations.addons_repo_revision}}'
-                targetRepository: '{{.metadata.annotations.addons_repo_url}}'
+                targetRevision: '{{metadata.annotations.addons_repo_revision}}'
+                targetRepository: '{{metadata.annotations.addons_repo_url}}'
                 chartVersion: "3.2.1" # Default chart version
               selector:
                 matchLabels:
