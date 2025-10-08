@@ -1,0 +1,67 @@
+# nonk8s
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: opensearch-dashboards
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+          # Workload clusters (+ env-specific overrides)
+          - merge:
+              mergeKeys: [server]
+              generators:
+                - clusters:
+                    selector:
+                      matchLabels:
+                        type: workload
+                    values:
+                      chartVersion: "3.2.1"
+                - clusters:
+                    selector:
+                      matchLabels:
+                        env: prod
+                    values:
+                      chartVersion: "3.2.0"
+          # Hub cluster (single item) provides the revision for everyone
+          - clusters:
+              selector:
+                matchLabels:
+                  type: hub
+              values:
+                hubRepoUrl: >-
+                  {{ `{{ .metadata.annotations.workloads_repo_url }}` }}
+                hubRepoRevision: >-
+                  {{ `{{ .metadata.annotations.workloads_repo_revision }}` }}
+  template:
+    metadata:
+      name: opensearch-dashboards-{{.name}}
+    spec:
+      project: default
+      sources:
+        - repoURL: '{{ .values.hubRepoUrl }}'
+          path: gitops/workloads
+          targetRevision: '{{ .values.hubRepoRevision }}'
+          ref: workloads
+        - repoURL: https://opensearch-project.github.io/helm-charts
+          chart: opensearch-dashboards
+          targetRevision: '{{.values.chartVersion}}'
+          helm:
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - '$workloads/environments/default/workloads/opensearch-dashboards/values.yaml'
+              - '$workloads/environments/{{.metadata.labels.env}}/workloads/opensearch-dashboards/values.yaml'
+              - '$workloads/cluster/{{.metadata.labels.cluster_name}}/workloads/opensearch-dashboards/values.yaml'
+      destination:
+        server: '{{.server}}'
+        namespace: 'opensearch-{{.metadata.labels.env}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
