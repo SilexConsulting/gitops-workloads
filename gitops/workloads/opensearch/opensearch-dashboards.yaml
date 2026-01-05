@@ -30,7 +30,7 @@ spec:
           - clusters:
               selector:
                 matchLabels:
-                  type: hub
+                  is_hub: "true"
               values:
                 hubRepoUrl: >-
                   {{ `{{ .metadata.annotations.workloads_repo_url }}` }}
@@ -54,7 +54,7 @@ spec:
             valueFiles:
               - '$workloads/environments/default/workloads/opensearch-dashboards/values.yaml'
               - '$workloads/environments/{{.metadata.labels.env}}/workloads/opensearch-dashboards/values.yaml'
-              - '$workloads/cluster/{{.metadata.labels.cluster_name}}/workloads/opensearch-dashboards/values.yaml'
+              - '$workloads/clusters/{{.metadata.labels.cluster_name}}/workloads/opensearch-dashboards/values.yaml'
       destination:
         server: '{{.server}}'
         namespace: 'opensearch-{{.metadata.labels.env}}'
