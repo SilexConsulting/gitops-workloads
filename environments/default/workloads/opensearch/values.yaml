@@ -1,3 +1,8 @@
-extraEnvs:
-  - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-    value: "roo4xeiV#"
+# The OpenSearch chart (security plugin enabled) requires OPENSEARCH_INITIAL_ADMIN_PASSWORD.
+# It is deliberately NOT set here (public repo): supply it per deployment from the private
+# overlay (GIT-13), e.g. gitops-private/workloads/clusters/<cluster>/opensearch/values.yaml:
+#
+#   extraEnvs:
+#     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+#       value: "<strong password>"
+{}
