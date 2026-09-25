@@ -1,0 +1,14 @@
+---
+# OpenSearch Dashboards catalogue defaults.
+#
+# The chart defaults to requests=limits=100m CPU / 512M memory. Dashboards (Node.js) does heavy work at
+# startup; capped at 0.1 CPU it never opens :5601 inside the startup probe window (10s + 20x10s), gets
+# killed (exit 137) and crash-loops forever (ivylen: ~12k restarts). Request a sensible amount, no CPU
+# limit (throttling is what starves startup), and give the Node heap headroom.
+resources:
+  requests:
+    cpu: 250m
+    memory: 768Mi
+  limits:
+    cpu: null # remove the chart's 100m CPU limit (Helm merges maps; null deletes the key)
+    memory: 1Gi
