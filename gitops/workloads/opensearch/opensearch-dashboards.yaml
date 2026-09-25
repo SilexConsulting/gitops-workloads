@@ -19,13 +19,13 @@ spec:
                       matchLabels:
                         type: workload
                     values:
-                      chartVersion: "3.2.1"
+                      chartVersion: "3.8.0"
                 - clusters:
                     selector:
                       matchLabels:
                         env: prod
                     values:
-                      chartVersion: "3.2.0"
+                      chartVersion: "3.8.0" # keep OpenSearch + Dashboards on the same version
           # Hub cluster (single item) provides the revision for everyone
           - clusters:
               selector:
