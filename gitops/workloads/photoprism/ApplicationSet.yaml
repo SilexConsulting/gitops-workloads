@@ -1,0 +1,64 @@
+# nonk8s
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: photoprism
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - merge:
+        mergeKeys: [server]
+        generators:
+          - clusters:
+              selector:
+                matchLabels:
+                  type: workload
+              values:
+                chartVersion: "1.1.6" # Default chart version (app 260919)
+          - clusters:
+              selector:
+                matchLabels:
+                  env: dev
+              values:
+                chartVersion: "1.1.6" # Default chart version for dev
+  template:
+    metadata:
+      name: photoprism-{{.name}}
+    spec:
+      project: default
+      sources:
+        - repoURL: '{{.metadata.annotations.workloads_repo_url}}'
+          path: 'gitops/workloads'
+          targetRevision: '{{.metadata.annotations.workloads_repo_revision}}'
+          ref: workloads
+        # Official chart: https://docs.photoprism.app/getting-started/advanced/kubernetes/
+        # (`photoprism-plus` runs the AGPL community image docker.io/photoprism/photoprism).
+        - repoURL: https://charts.photoprism.app/photoprism
+          chart: photoprism-plus
+          targetRevision: '{{.values.chartVersion}}'
+          helm:
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - '$workloads/environments/default/workloads/photoprism/values.yaml'
+              - '$workloads/environments/{{.metadata.labels.env}}/workloads/photoprism/values.yaml'
+              - '$workloads/clusters/{{.metadata.labels.cluster_name}}/workloads/photoprism/values.yaml'
+      destination:
+        server: '{{.server}}'
+        namespace: 'photoprism-{{.metadata.labels.env}}'
+      # The chart's Secret keeps its generated admin password via Helm `lookup`, which Argo CD
+      # never runs — every render would produce a new random password. Keep the live value.
+      ignoreDifferences:
+        - kind: Secret
+          name: photoprism-secrets
+          jsonPointers:
+            - /data
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true

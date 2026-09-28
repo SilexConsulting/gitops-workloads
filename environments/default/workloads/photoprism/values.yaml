@@ -1,0 +1,30 @@
+# Default values for the photoprism workload (all clusters).
+# Chart: photoprism-plus (https://charts.photoprism.app/photoprism). Override per env / cluster.
+#
+# Chart quirks (1.1.6):
+# - `resources` is not wired into the StatefulSet template, so it is not set here (no effect).
+# - a non-empty `config.PHOTOPRISM_SITE_URL` is emitted twice in the container env (siteURL helper +
+#   the config loop); server-side apply rejects the duplicate key, so leave it unset.
+
+# Stable object names (StatefulSet/Service/PVCs `photoprism*`, Secret `photoprism-secrets`)
+# instead of `<argo-app-name>-photoprism`; the appset's ignoreDifferences relies on the Secret name.
+fullnameOverride: photoprism
+
+adminUser: admin
+# adminPassword: left empty -> generated on first sync and kept (see the appset's ignoreDifferences).
+#   kubectl get secret photoprism-secrets -n photoprism-<env> \
+#     -o jsonpath='{.data.PHOTOPRISM_ADMIN_PASSWORD}' | base64 -d
+
+# SQLite (chart default) is fine for a small library; for large libraries or multiple users switch
+# to MariaDB via `database.driver: mysql` + `database.passwordSecretName`.
+database:
+  driver: sqlite
+
+persistence:
+  originals:
+    size: 50Gi
+  storage:
+    size: 10Gi # SQLite DB, thumbnails/sidecar cache, backups
+
+config:
+  PHOTOPRISM_DEFAULT_TIMEZONE: Europe/London
