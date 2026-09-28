@@ -5,6 +5,21 @@
 # - `resources` is not wired into the StatefulSet template, so it is not set here (no effect).
 # - a non-empty `config.PHOTOPRISM_SITE_URL` is emitted twice in the container env (siteURL helper +
 #   the config loop); server-side apply rejects the duplicate key, so leave it unset.
+# - the default securityContext (runAsUser 1000) cannot start the image: its s6-overlay `/init` needs
+#   /run owned by the container user ("preinit: fatal: /run belongs to uid 0 instead of 1000") and the
+#   chart has no way to mount a volume there. See securityContext below.
+
+# Start as root so s6-overlay can prepare /run and the volumes, then PhotoPrism's init drops the app
+# itself to PHOTOPRISM_UID/GID (1000) — the upstream docker-compose model. Only the s6 supervisors
+# keep uid 0, with a minimal capability set and no privilege escalation.
+securityContext:
+  runAsNonRoot: false
+  runAsUser: 0
+  runAsGroup: 0
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]
+    add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER]
 
 # Stable object names (StatefulSet/Service/PVCs `photoprism*`, Secret `photoprism-secrets`)
 # instead of `<argo-app-name>-photoprism`; the appset's ignoreDifferences relies on the Secret name.
@@ -28,3 +43,5 @@ persistence:
 
 config:
   PHOTOPRISM_DEFAULT_TIMEZONE: Europe/London
+  PHOTOPRISM_UID: "1000" # see securityContext
+  PHOTOPRISM_GID: "1000"
